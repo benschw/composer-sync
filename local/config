@@ -1,0 +1,14 @@
+[core]
+	bare = true
+	repositoryformatversion = 0
+	filemode = true
+[remote "origin"]
+	url = git://github.com/fliglio/web.git
+
+	fetch = +refs/heads/*:refs/remotes/origin/*
+[branch "master"]
+	remote = origin
+	merge = refs/heads/master
+[remote "upstream"]
+	url = http://foo:asdf@localhost:7990/scm/phpv/web.git
+	fetch = +refs/heads/*:refs/remotes/upstream/*
