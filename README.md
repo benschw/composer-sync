@@ -6,12 +6,16 @@ a private stash repo
 
 update `cfg.yaml` (and optionally copy it to its default location: `~/.composer-sync.yaml`)
 
+### Usage
 
 	composer-sync [OPTIONS]... COMMAND VENDOR/PACKAGE
 
 	  -u       sync all packages, not just new one
 	  -dryrun  show add/sync/skip but don't do anything
 	  -config  specify a config other that ~/.composer-sync.yaml
+
+
+### Examples
 
 	composer-sync load fliglio/web
 	add:  fliglio_web 
