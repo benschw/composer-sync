@@ -7,6 +7,12 @@ a private stash repo
 update `cfg.yaml` (and optionally copy it to its default location: `~/.composer-sync.yaml`)
 
 
+	composer-sync [OPTIONS]... COMMAND VENDOR/PACKAGE
+
+	  -u       sync all packages, not just new one
+	  -dryrun  show add/sync/skip but don't do anything
+	  -config  specify a config other that ~/.composer-sync.yaml
+
 	composer-sync load fliglio/web
 	add:  fliglio_web 
 	add:  doctrine_cache 
