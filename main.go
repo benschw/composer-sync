@@ -7,14 +7,27 @@ import (
 
 	"github.com/benschw/composer-sync/packagist"
 	"github.com/benschw/composer-sync/stash"
+	"github.com/benschw/opin-go/config"
 )
+
+type Config struct {
+	StashRepoTpl string `json:"stashrepotpl"`
+	StashAPIUrl  string `json:"stashapiurl"`
+	StashProj    string `json:"stashproj"`
+}
 
 func main() {
 	update := flag.Bool("u", false, "update existing repositories")
 	dryrun := flag.Bool("dryrun", false, "perform dryrun")
+	cfgPath := flag.String("config", "~/.composer-sync.yaml", "config path")
 
-	destTpl := "http://foo:asdf@localhost:7990/scm/phpv/%s.git"
 	flag.Parse()
+
+	cfg := &Config{}
+	if err := config.Bind(*cfgPath, cfg); err != nil {
+		fmt.Printf("Bad Config: %s", err)
+		os.Exit(1)
+	}
 
 	// Pull subcommand & package name from args
 	if flag.NArg() != 2 {
@@ -32,14 +45,14 @@ func main() {
 		os.Exit(1)
 	}
 
-	st := stash.New("http://foo:asdf@localhost:7990")
+	st := stash.New(cfg.StashAPIUrl)
 	pa := packagist.New()
 
 	loader := &Loader{
 		SClient:   st,
 		PClient:   pa,
-		DestTpl:   destTpl,
-		StashProj: "PHPV",
+		DestTpl:   cfg.StashRepoTpl,
+		StashProj: cfg.StashProj,
 	}
 
 	if err := loader.Load(name, *update, *dryrun); err != nil {
