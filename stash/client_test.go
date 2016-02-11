@@ -11,11 +11,23 @@ func TestGetRepo(t *testing.T) {
 	c := New("http://foo:asdf@localhost:7990")
 
 	// when
-	r, err := c.GetRepo("PHPV", "web")
+	r, err := c.GetRepo("PHPV", "test")
+	assert.Nil(t, err)
+	assert.Nil(t, r)
+
+	r2, err := c.CreateRepo("PHPV", "test")
+	assert.Nil(t, err)
+	assert.NotNil(t, r2)
+
+	r3, err := c.GetRepo("PHPV", "test")
+	assert.Nil(t, err)
+	assert.NotNil(t, r3)
 
 	//then
-	assert.Nil(t, err)
-	assert.Equal(t, "web", r.Slug, "name doesn't match")
+	assert.Equal(t, "test", r2.Slug, "name doesn't match")
+	assert.Equal(t, "test", r3.Slug, "name doesn't match")
+
+	c.DeleteRepo("PHPV", "test")
 }
 
 func TestCreateRepo(t *testing.T) {

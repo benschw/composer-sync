@@ -8,12 +8,20 @@ import (
 	"github.com/benschw/composer-sync/packagist"
 	"github.com/benschw/composer-sync/stash"
 	"github.com/benschw/opin-go/config"
+	satis "github.com/benschw/satis-go/satis/client"
 )
 
 type Config struct {
-	StashRepoTpl string `json:"stashrepotpl"`
-	StashAPIUrl  string `json:"stashapiurl"`
-	StashProj    string `json:"stashproj"`
+	Stash StashConfig `yaml:"stash"`
+	Satis SatisConfig `yaml:"satis"`
+}
+type StashConfig struct {
+	RepoTpl string `yaml:"repo_tpl"`
+	ApiUrl  string `yaml:"api_url"`
+	ProjKey string `yaml:"proj_key"`
+}
+type SatisConfig struct {
+	ApiUrl string `yaml:"api_url"`
 }
 
 func main() {
@@ -30,29 +38,20 @@ func main() {
 	}
 
 	// Pull subcommand & package name from args
-	if flag.NArg() != 2 {
-		fmt.Printf("expected 2 arguments\n")
+	if flag.NArg() != 1 {
+		fmt.Printf("expected 1 arguments\n")
 		flag.Usage()
 		os.Exit(1)
 	}
 
-	cmd := flag.Arg(0)
-	name := flag.Arg(1)
-
-	if cmd != "load" {
-		fmt.Printf("invalid subcommand %s\n", cmd)
-		flag.Usage()
-		os.Exit(1)
-	}
-
-	st := stash.New(cfg.StashAPIUrl)
-	pa := packagist.New()
+	name := flag.Arg(0)
 
 	loader := &Loader{
-		SClient:   st,
-		PClient:   pa,
-		DestTpl:   cfg.StashRepoTpl,
-		StashProj: cfg.StashProj,
+		Stash:     stash.New(cfg.Stash.ApiUrl),
+		Packagist: packagist.New(),
+		Satis:     &satis.SatisClient{Host: cfg.Satis.ApiUrl},
+		DestTpl:   cfg.Stash.RepoTpl,
+		StashProj: cfg.Stash.ProjKey,
 	}
 
 	if err := loader.Load(name, *update, *dryrun); err != nil {

@@ -9,17 +9,20 @@ import (
 	"github.com/benschw/composer-sync/git"
 	"github.com/benschw/composer-sync/packagist"
 	"github.com/benschw/composer-sync/stash"
+	satis "github.com/benschw/satis-go/satis/client"
+	satisapi "github.com/benschw/satis-go/satis/satisphp/api"
 )
 
 type Loader struct {
-	SClient   *stash.Client
-	PClient   *packagist.Client
+	Stash     *stash.Client
+	Packagist *packagist.Client
+	Satis     *satis.SatisClient
 	DestTpl   string
 	StashProj string
 }
 
 func (l *Loader) Load(name string, update bool, dryrun bool) error {
-	packages, err := l.PClient.GetRecursive(name)
+	packages, err := l.Packagist.GetRecursive(name)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -29,7 +32,7 @@ func (l *Loader) Load(name string, update bool, dryrun bool) error {
 		repoName := strings.Replace(p.Name, "/", "_", -1)
 		destRepo := fmt.Sprintf(l.DestTpl, repoName)
 
-		repo, err := l.SClient.GetRepo(l.StashProj, repoName)
+		repo, err := l.Stash.GetRepo(l.StashProj, repoName)
 		if err != nil {
 			return err
 		}
@@ -37,10 +40,13 @@ func (l *Loader) Load(name string, update bool, dryrun bool) error {
 		if repo == nil {
 			fmt.Printf("add:  %s \n", repoName)
 			if !dryrun {
-				if _, err = l.SClient.CreateRepo(l.StashProj, repoName); err != nil {
+				if _, err = l.Stash.CreateRepo(l.StashProj, repoName); err != nil {
 					return err
 				}
 				l.syncRepo(repoName, p.Repository, destRepo)
+				if _, err = l.Satis.AddRepo(satisapi.NewRepo("vcs", destRepo)); err != nil {
+					return nil
+				}
 			}
 		} else if update {
 
@@ -51,6 +57,11 @@ func (l *Loader) Load(name string, update bool, dryrun bool) error {
 			}
 		} else {
 			fmt.Printf("skip: %s\n", repoName)
+		}
+	}
+	if !dryrun {
+		if err := l.Satis.GenerateStaticWeb(); err != nil {
+			return err
 		}
 	}
 
