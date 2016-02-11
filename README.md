@@ -6,6 +6,12 @@ a private stash repo
 
 update `cfg.yaml` (and optionally copy it to its default location: `~/.composer-sync.yaml`)
 
+### Download
+- [composer-sync (linux/amd64)](https://drone.io/github.com/benschw/composer-sync/files/composer-sync.linux-amd64.gz)
+- [composer-sync (darwin/amd64)](https://drone.io/github.com/benschw/composer-sync/files/composer-sync.darwin-amd64.gz)
+
+- [cfg.yaml](https://drone.io/github.com/benschw/composer-sync/files/cfg.yaml)
+
 ### Usage
 
 	composer-sync [OPTIONS]... VENDOR/PACKAGE
