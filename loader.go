@@ -73,7 +73,7 @@ func (l *Loader) syncRepo(repoName string, srcRepo string, destRepo string) erro
 	if err != nil {
 		return err
 	}
-	defer os.Remove(path)
+	defer os.RemoveAll(path)
 
 	if err = git.CloneBare(srcRepo, path); err != nil {
 		return err
