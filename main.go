@@ -26,6 +26,7 @@ type SatisConfig struct {
 
 func main() {
 	update := flag.Bool("u", false, "update existing repositories")
+	recursive := flag.Bool("r", false, "Recusively operate on all dependencies")
 	dryrun := flag.Bool("dryrun", false, "perform dryrun")
 	cfgPath := flag.String("config", "~/.composer-sync.yaml", "config path")
 
@@ -54,7 +55,7 @@ func main() {
 		StashProj: cfg.Stash.ProjKey,
 	}
 
-	if err := loader.Load(name, *update, *dryrun); err != nil {
+	if err := loader.Load(name, *update, *dryrun, *recursive); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
