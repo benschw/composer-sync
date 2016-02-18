@@ -4,25 +4,13 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"os/user"
 
+	"github.com/benschw/composer-sync/config"
 	"github.com/benschw/composer-sync/packagist"
 	"github.com/benschw/composer-sync/stash"
-	"github.com/benschw/opin-go/config"
 	satis "github.com/benschw/satis-go/satis/client"
 )
-
-type Config struct {
-	Stash StashConfig `yaml:"stash"`
-	Satis SatisConfig `yaml:"satis"`
-}
-type StashConfig struct {
-	RepoTpl string `yaml:"repo_tpl"`
-	ApiUrl  string `yaml:"api_url"`
-	ProjKey string `yaml:"proj_key"`
-}
-type SatisConfig struct {
-	ApiUrl string `yaml:"api_url"`
-}
 
 func main() {
 	update := flag.Bool("u", false, "update existing repositories")
@@ -31,9 +19,18 @@ func main() {
 	cfgPath := flag.String("config", "~/.composer-sync.yaml", "config path")
 
 	flag.Parse()
+	if *cfgPath == "~/.composer-sync.yaml" {
+		usr, err := user.Current()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		cfgPathStr := (usr.HomeDir + "/.composer-sync.yaml")
+		cfgPath = &cfgPathStr
+	}
 
-	cfg := &Config{}
-	if err := config.Bind(*cfgPath, cfg); err != nil {
+	cfg, err := config.Load(*cfgPath)
+	if err != nil {
 		fmt.Printf("Bad Config: %s", err)
 		os.Exit(1)
 	}
@@ -47,8 +44,21 @@ func main() {
 
 	name := flag.Arg(0)
 
+	loginCmd := name == "login"
+
+	if (cfg.Stash.Login == "" || cfg.Stash.Password == "") || loginCmd {
+		if err := config.Login(cfg, *cfgPath, loginCmd); err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
+		if loginCmd {
+			os.Exit(0)
+		}
+	}
+
 	loader := &Loader{
-		Stash:     stash.New(cfg.Stash.ApiUrl),
+		Stash:     stash.New(cfg.Stash.ApiUrl, cfg.Stash.Login, cfg.Stash.Password),
 		Packagist: packagist.New(),
 		Satis:     &satis.SatisClient{Host: cfg.Satis.ApiUrl},
 		DestTpl:   cfg.Stash.RepoTpl,

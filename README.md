@@ -23,11 +23,17 @@ update `cfg.yaml` (and optionally copy it to its default location: `~/.composer-
 
 
 ### Examples
-	
-	composer-sync fliglio/web
+
+	$ composer-sync login
+	Authenticate With Stash:
+	 Login: foo
+	 Password: 
+	Auth Updated in '/home/ben/.composer-sync.yaml'
+
+	$ composer-sync fliglio/web
 	add:  fliglio_web 
 
-	composer-sync -r fliglio/web
+	$ composer-sync -r fliglio/web
 	skip: fliglio_web 
 	add:  doctrine_cache 
 	add:  symfony_validator 
@@ -37,7 +43,7 @@ update `cfg.yaml` (and optionally copy it to its default location: `~/.composer-
 	add:  doctrine_annotations 
 	add:  doctrine_lexer
 
-	composer-sync -r fliglio/web
+	$ composer-sync -r fliglio/web
 	skip: fliglio_web 
 	skip: doctrine_cache 
 	skip: symfony_validator 
@@ -47,7 +53,7 @@ update `cfg.yaml` (and optionally copy it to its default location: `~/.composer-
 	skip: doctrine_annotations 
 	skip: doctrine_lexer
 
-	composer-sync -ur fliglio/web
+	$ composer-sync -u -r fliglio/web
 	sync: fliglio_web 
 	sync: doctrine_cache 
 	sync: symfony_validator 

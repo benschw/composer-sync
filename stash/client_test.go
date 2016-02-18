@@ -8,7 +8,7 @@ import (
 
 func TestGetRepo(t *testing.T) {
 	// given
-	c := New("http://foo:asdf@localhost:7990")
+	c := New("http://foo:asdf@localhost:7990", "foo", "asdf")
 
 	// when
 	r, err := c.GetRepo("UT", "test")
@@ -32,7 +32,7 @@ func TestGetRepo(t *testing.T) {
 
 func TestCreateRepo(t *testing.T) {
 	// given
-	c := New("http://foo:asdf@localhost:7990")
+	c := New("http://localhost:7990", "foo", "asdf")
 
 	// when
 	r, err := c.CreateRepo("UT", "web3")
@@ -50,7 +50,7 @@ func TestCreateRepo(t *testing.T) {
 
 func TestGetPage(t *testing.T) {
 	// given
-	c := New("http://foo:asdf@localhost:7990")
+	c := New("http://localhost:7990", "foo", "asdf")
 	c.CreateRepo("UT", "web1")
 	c.CreateRepo("UT", "web2")
 	c.CreateRepo("UT", "web3")
@@ -61,7 +61,7 @@ func TestGetPage(t *testing.T) {
 	//then
 	assert.Nil(t, err)
 
-	assert.Equal(t, len(repos), 3, "should be 3 repos")
+	assert.Equal(t, 3, len(repos), "should be 3 repos")
 
 	c.DeleteRepo("UT", "web1")
 	c.DeleteRepo("UT", "web2")

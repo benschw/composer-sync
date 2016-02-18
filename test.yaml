@@ -1,6 +1,7 @@
 stash:
   repo_tpl: "ssh://git@localhost:7999/ut/%s.git"
-  api_url: "http://foo:asdf@localhost:7990"
+  api_url: "http://localhost:7990"
   proj_key: "UT"
+  auth: "Zm9vOmFzZGY="
 satis:
   api_url: "http://localhost:8080"

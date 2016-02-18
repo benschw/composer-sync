@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	"testing"
@@ -9,7 +9,7 @@ import (
 
 func TestConfig(t *testing.T) {
 	// given
-	cfgPath := "./test.yaml"
+	cfgPath := "../test.yaml"
 
 	// when
 	cfg := &Config{}

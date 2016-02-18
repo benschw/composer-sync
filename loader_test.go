@@ -3,21 +3,24 @@ package main
 import (
 	"testing"
 
+	"github.com/benschw/composer-sync/config"
 	"github.com/benschw/composer-sync/packagist"
 	"github.com/benschw/composer-sync/stash"
-	"github.com/benschw/opin-go/config"
 	satis "github.com/benschw/satis-go/satis/client"
 	"github.com/stretchr/testify/assert"
 )
 
-var cfg = &Config{}
+var cfg *config.Config
 var stashClient *stash.Client
 var satisClient *satis.SatisClient
 
 func init() {
-	config.Bind("./test.yaml", cfg)
-
-	stashClient = stash.New(cfg.Stash.ApiUrl)
+	c, err := config.Load("./test.yaml")
+	if err != nil {
+		panic(err)
+	}
+	cfg = c
+	stashClient = stash.New(cfg.Stash.ApiUrl, cfg.Stash.Login, cfg.Stash.Password)
 	satisClient = &satis.SatisClient{Host: cfg.Satis.ApiUrl}
 }
 
@@ -37,7 +40,6 @@ func cleanup() {
 	for _, repo := range satisRepos {
 		satisClient.DeleteRepo(repo.Id)
 	}
-
 }
 
 func TestLoadOne(t *testing.T) {
@@ -63,8 +65,9 @@ func TestLoadOne(t *testing.T) {
 
 	stashRepos, _ := stashClient.GetAllReposPage(cfg.Stash.ProjKey)
 	assert.Equal(t, 1, len(stashRepos), "should be 1 repo")
-	assert.Equal(t, "fliglio_web", stashRepos[0].Slug, "repo name unexpected")
-
+	if len(stashRepos) > 0 {
+		assert.Equal(t, "fliglio_web", stashRepos[0].Slug, "repo name unexpected")
+	}
 	satisRepos, _ := satisClient.FindAllRepos()
 	assert.Equal(t, 1, len(satisRepos), "should be 1 repo")
 

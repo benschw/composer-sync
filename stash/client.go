@@ -2,11 +2,17 @@ package stash
 
 import (
 	"fmt"
-	"log"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/benschw/opin-go/rest"
 )
+
+var headers map[string]interface{}
+
+func init() {
+	headers = map[string]interface{}{"X-Atlassian-Token": "no-check"}
+}
 
 type RepoPage struct {
 	Size       int    `json:"size"`
@@ -26,12 +32,28 @@ type Repo struct {
 	State string `json:"state"`
 }
 
-func New(url string) *Client {
-	return &Client{Url: url}
+func New(url string, login string, password string) *Client {
+	return &Client{
+		Url:      url,
+		Login:    login,
+		Password: password,
+	}
 }
 
 type Client struct {
-	Url string
+	Url      string
+	Login    string
+	Password string
+}
+
+func (c *Client) makeRequest(method string, url string, body interface{}) (*http.Response, error) {
+	r, err := rest.BuildRequest(method, url, headers, body)
+	if err != nil {
+		return nil, err
+	}
+	r.SetBasicAuth(c.Login, c.Password)
+
+	return http.DefaultClient.Do(r)
 }
 
 func (c *Client) CreateRepo(proj string, name string) (*Repo, error) {
@@ -40,14 +62,15 @@ func (c *Client) CreateRepo(proj string, name string) (*Repo, error) {
 	body := RepoConfig{Name: name, ScmId: "git", Forkable: true}
 
 	url := fmt.Sprintf("%s/rest/api/1.0/projects/%s/repos", c.Url, proj)
-	r, err := rest.NewRequestH("POST", url, map[string]interface{}{"X-Atlassian-Token": "no-check"}, body)
+	r, err := c.makeRequest("POST", url, body)
 	if err != nil {
 		return &repo, err
 	}
+
 	err = rest.ProcessResponseEntity(r, &repo, http.StatusCreated)
 	if err != nil {
-		b, _ := rest.ProcessResponseBytes(r, http.StatusBadRequest)
-		log.Println(string(b[:]))
+		b, _ := ioutil.ReadAll(r.Body)
+		return nil, fmt.Errorf(string(b[:]))
 	}
 	return &repo, err
 }
@@ -55,7 +78,7 @@ func (c *Client) GetRepo(proj string, name string) (*Repo, error) {
 	var repo Repo
 	url := fmt.Sprintf("%s/rest/api/1.0/projects/%s/repos/%s", c.Url, proj, name)
 
-	r, err := rest.NewRequestH("GET", url, map[string]interface{}{"X-Atlassian-Token": "no-check"}, nil)
+	r, err := c.makeRequest("GET", url, nil)
 	if err != nil {
 		return &repo, err
 	}
@@ -70,7 +93,7 @@ func (c *Client) GetAllReposPage(proj string) ([]Repo, error) {
 	var page RepoPage
 	url := fmt.Sprintf("%s/rest/api/1.0/projects/%s/repos", c.Url, proj)
 
-	r, err := rest.NewRequestH("GET", url, map[string]interface{}{"X-Atlassian-Token": "no-check"}, nil)
+	r, err := c.makeRequest("GET", url, nil)
 	if err != nil {
 		return page.Values, err
 	}
@@ -84,7 +107,7 @@ func (c *Client) GetAllReposPage(proj string) ([]Repo, error) {
 func (c *Client) DeleteRepo(proj string, name string) error {
 	url := fmt.Sprintf("%s/rest/api/1.0/projects/%s/repos/%s", c.Url, proj, name)
 
-	r, err := rest.NewRequestH("DELETE", url, map[string]interface{}{"X-Atlassian-Token": "no-check"}, nil)
+	r, err := c.makeRequest("DELETE", url, nil)
 	if err != nil {
 		return err
 	}
