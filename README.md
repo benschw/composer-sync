@@ -17,14 +17,18 @@ update `cfg.yaml` (and optionally copy it to its default location: `~/.composer-
 	composer-sync [OPTIONS]... VENDOR/PACKAGE
 
 	  -u       sync all packages, not just new one
+	  -r       recursively load transitive dependencies
 	  -dryrun  show add/sync/skip but don't do anything
 	  -config  specify a config other that ~/.composer-sync.yaml
 
 
 ### Examples
-
+	
 	composer-sync fliglio/web
 	add:  fliglio_web 
+
+	composer-sync -r fliglio/web
+	skip: fliglio_web 
 	add:  doctrine_cache 
 	add:  symfony_validator 
 	add:  symfony_translation 
@@ -33,7 +37,7 @@ update `cfg.yaml` (and optionally copy it to its default location: `~/.composer-
 	add:  doctrine_annotations 
 	add:  doctrine_lexer
 
-	composer-sync fliglio/web
+	composer-sync -r fliglio/web
 	skip: fliglio_web 
 	skip: doctrine_cache 
 	skip: symfony_validator 
@@ -43,7 +47,7 @@ update `cfg.yaml` (and optionally copy it to its default location: `~/.composer-
 	skip: doctrine_annotations 
 	skip: doctrine_lexer
 
-	composer-sync -u fliglio/web
+	composer-sync -ur fliglio/web
 	sync: fliglio_web 
 	sync: doctrine_cache 
 	sync: symfony_validator 

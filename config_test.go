@@ -9,7 +9,7 @@ import (
 
 func TestConfig(t *testing.T) {
 	// given
-	cfgPath := "./cfg.yaml"
+	cfgPath := "./test.yaml"
 
 	// when
 	cfg := &Config{}
@@ -17,5 +17,5 @@ func TestConfig(t *testing.T) {
 
 	//then
 	assert.Nil(t, err)
-	assert.Equal(t, "PHPV", cfg.Stash.ProjKey, "project key looks wrong")
+	assert.Equal(t, "UT", cfg.Stash.ProjKey, "project key looks wrong")
 }

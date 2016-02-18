@@ -8,6 +8,13 @@ import (
 	"github.com/benschw/opin-go/rest"
 )
 
+type RepoPage struct {
+	Size       int    `json:"size"`
+	Limit      int    `json:"limit"`
+	IsLastPage bool   `json:"isLiastPage"`
+	Values     []Repo `json:"values"`
+}
+
 type RepoConfig struct {
 	Name     string `json:"name"`
 	ScmId    string `json:"scmId"`
@@ -58,6 +65,21 @@ func (c *Client) GetRepo(proj string, name string) (*Repo, error) {
 		return nil, err
 	}
 	return &repo, err
+}
+func (c *Client) GetAllReposPage(proj string) ([]Repo, error) {
+	var page RepoPage
+	url := fmt.Sprintf("%s/rest/api/1.0/projects/%s/repos", c.Url, proj)
+
+	r, err := rest.NewRequestH("GET", url, map[string]interface{}{"X-Atlassian-Token": "no-check"}, nil)
+	if err != nil {
+		return page.Values, err
+	}
+	err = rest.ProcessResponseEntity(r, &page, http.StatusOK)
+	if err != nil {
+		_, err := rest.ProcessResponseBytes(r, http.StatusNotFound)
+		return nil, err
+	}
+	return page.Values, err
 }
 func (c *Client) DeleteRepo(proj string, name string) error {
 	url := fmt.Sprintf("%s/rest/api/1.0/projects/%s/repos/%s", c.Url, proj, name)
