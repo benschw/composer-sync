@@ -1,6 +1,7 @@
 package stash
 
 import (
+	"log"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -57,7 +58,7 @@ func TestGetPage(t *testing.T) {
 
 	// when
 	repos, err := c.GetAllReposPage("UT")
-
+	log.Printf("%+v", repos)
 	//then
 	assert.Nil(t, err)
 

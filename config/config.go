@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/user"
 	"strings"
 
 	"github.com/benschw/opin-go/config"
@@ -29,7 +30,23 @@ type SatisConfig struct {
 	ApiUrl string `yaml:"api_url"`
 }
 
+func normalizePath(cfgPath string) (string, error) {
+	if cfgPath == "~/.composer-sync.yaml" {
+		usr, err := user.Current()
+		if err != nil {
+			return "", err
+		}
+		cfgPath = (usr.HomeDir + "/.composer-sync.yaml")
+	}
+	return cfgPath, nil
+}
+
 func Load(cfgPath string) (*Config, error) {
+	cfgPath, err := normalizePath(cfgPath)
+	if err != nil {
+		return nil, err
+	}
+
 	cfg := &Config{}
 	if err := config.Bind(cfgPath, cfg); err != nil {
 		return nil, err
@@ -98,6 +115,11 @@ func promptToSave(cfgPath string) bool {
 }
 
 func save(cfg *Config, cfgPath string) error {
+	cfgPath, err := normalizePath(cfgPath)
+	if err != nil {
+		return err
+	}
+
 	str := cfg.Stash.Login + ":" + cfg.Stash.Password
 	strEnc := base64.StdEncoding.EncodeToString([]byte(str))
 	cfg.Stash.AuthEncoded = strEnc

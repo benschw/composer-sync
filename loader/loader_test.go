@@ -1,4 +1,4 @@
-package main
+package loader
 
 import (
 	"testing"
@@ -15,7 +15,7 @@ var stashClient *stash.Client
 var satisClient *satis.SatisClient
 
 func init() {
-	c, err := config.Load("./test.yaml")
+	c, err := config.Load("../test.yaml")
 	if err != nil {
 		panic(err)
 	}

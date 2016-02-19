@@ -1,9 +1,7 @@
-package main
+package loader
 
 import (
 	"fmt"
-	"io/ioutil"
-	"os"
 	"strings"
 
 	"github.com/benschw/composer-sync/git"
@@ -23,11 +21,11 @@ type Loader struct {
 
 func (l *Loader) Load(name string, update bool, dryrun bool, recursive bool) error {
 	if recursive {
-		if err := l.LoadRecursive(name, update, dryrun); err != nil {
+		if err := l.loadRecursive(name, update, dryrun); err != nil {
 			return err
 		}
 	} else {
-		if err := l.LoadOne(name, update, dryrun); err != nil {
+		if err := l.loadOne(name, update, dryrun); err != nil {
 			return err
 		}
 	}
@@ -39,14 +37,14 @@ func (l *Loader) Load(name string, update bool, dryrun bool, recursive bool) err
 	return nil
 }
 
-func (l *Loader) LoadOne(name string, update bool, dryrun bool) error {
+func (l *Loader) loadOne(name string, update bool, dryrun bool) error {
 	p, err := l.Packagist.Get(name)
 	if err != nil {
 		return err
 	}
 	return l.loadPackage(p, update, dryrun)
 }
-func (l *Loader) LoadRecursive(name string, update bool, dryrun bool) error {
+func (l *Loader) loadRecursive(name string, update bool, dryrun bool) error {
 	packages, err := l.Packagist.GetRecursive(name)
 	if err != nil {
 		return err
@@ -75,7 +73,7 @@ func (l *Loader) loadPackage(p packagist.Package, update bool, dryrun bool) erro
 			if _, err = l.Stash.CreateRepo(l.StashProj, repoName); err != nil {
 				return err
 			}
-			l.syncRepo(repoName, p.Repository, destRepo)
+			git.MirrorRepo(p.Repository, destRepo)
 			if _, err = l.Satis.AddRepo(satisapi.NewRepo("vcs", destRepo)); err != nil {
 				return err
 			}
@@ -85,25 +83,11 @@ func (l *Loader) loadPackage(p packagist.Package, update bool, dryrun bool) erro
 		fmt.Printf("sync: %s \n", repoName)
 
 		if !dryrun {
-			l.syncRepo(repoName, p.Repository, destRepo)
+			git.MirrorRepo(p.Repository, destRepo)
 		}
 	} else {
 		fmt.Printf("skip: %s\n", repoName)
 	}
 
 	return nil
-}
-
-func (l *Loader) syncRepo(repoName string, srcRepo string, destRepo string) error {
-	path, err := ioutil.TempDir("/tmp", "vendor-sync")
-	if err != nil {
-		return err
-	}
-	defer os.RemoveAll(path)
-
-	if err = git.CloneBare(srcRepo, path); err != nil {
-		return err
-	}
-
-	return git.PushMirror(destRepo, path)
 }

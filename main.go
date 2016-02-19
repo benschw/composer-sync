@@ -4,9 +4,9 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"os/user"
 
 	"github.com/benschw/composer-sync/config"
+	"github.com/benschw/composer-sync/loader"
 	"github.com/benschw/composer-sync/packagist"
 	"github.com/benschw/composer-sync/stash"
 	satis "github.com/benschw/satis-go/satis/client"
@@ -19,15 +19,6 @@ func main() {
 	cfgPath := flag.String("config", "~/.composer-sync.yaml", "config path")
 
 	flag.Parse()
-	if *cfgPath == "~/.composer-sync.yaml" {
-		usr, err := user.Current()
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		cfgPathStr := (usr.HomeDir + "/.composer-sync.yaml")
-		cfgPath = &cfgPathStr
-	}
 
 	cfg, err := config.Load(*cfgPath)
 	if err != nil {
@@ -57,7 +48,7 @@ func main() {
 		}
 	}
 
-	loader := &Loader{
+	loader := &loader.Loader{
 		Stash:     stash.New(cfg.Stash.ApiUrl, cfg.Stash.Login, cfg.Stash.Password),
 		Packagist: packagist.New(),
 		Satis:     &satis.SatisClient{Host: cfg.Satis.ApiUrl},
