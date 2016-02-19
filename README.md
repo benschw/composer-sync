@@ -73,6 +73,9 @@ update `cfg.yaml` (and optionally copy it to its default location: `~/.composer-
 	- install `foo` user's ssh key with the user running `satis-go` (connect to stash to accept key)
 - Run tests serially to accomodate single stash instance
 
+<!-- break -->
+
+
 	go test -p=1 ./...
 
 
