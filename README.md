@@ -63,4 +63,16 @@ update `cfg.yaml` (and optionally copy it to its default location: `~/.composer-
 	sync: doctrine_annotations 
 	sync: doctrine_lexer
 
+## Testing
+
+- Install [Stash](https://www.atlassian.com/software/bitbucket/download/)
+	- create user `foo` with password `asdf`
+	- configure an ssh key for `foo`
+	- create project with slug `UT` and grant `foo` write access
+- Install [satis-go](https://github.com/benschw/satis-go)
+	- install `foo` user's ssh key with the user running `satis-go` (connect to stash to accept key)
+- Run tests serially to accomodate single stash instance
+
+	go test -p=1 ./...
+
 
